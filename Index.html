@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jarvis AI</title>
+    <style>
+        body { background: #000; color: #00d9ff; text-align: center; font-family: sans-serif; }
+        .reactor { width: 120px; height: 120px; border: 4px solid #00d9ff; border-radius: 50%; margin: 50px auto; box-shadow: 0 0 15px #00d9ff; display: flex; align-items: center; justify-content: center; font-size: 40px; cursor: pointer; }
+        #apiKey { background: #111; color: #00d9ff; border: 1px solid #00d9ff; padding: 10px; width: 80%; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>JARVIS</h1>
+    <input type="password" id="key" placeholder="Enter Gemini API Key">
+    <button onclick="save()" style="background:#00d9ff; padding:10px; border:none; border-radius:5px; font-weight:bold;">SAVE</button>
+    <div class="reactor" id="btn" onclick="start()">🎙️</div>
+    <p id="st">Standby</p>
+    <p id="res" style="color:white; padding:20px;"></p>
+
+    <script>
+        let K = "";
+        function save() { K = document.getElementById('key').value; alert("Key Saved, Sir."); }
+        function start() {
+            if(!K) return alert("API Key missing!");
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.onstart = () => { document.getElementById('st').innerText = "Listening..."; };
+            rec.onresult = async (e) => {
+                const t = e.results[0][0].transcript;
+                document.getElementById('st').innerText = "Processing...";
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${K}`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({contents: [{parts: [{text: t}]}]})
+                });
+                const d = await r.json();
+                const msg = d.candidates[0].content.parts[0].text;
+                document.getElementById('res').innerText = msg;
+                speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
+            };
+            rec.start();
+        }
+    </script>
+</body>
+</html>
