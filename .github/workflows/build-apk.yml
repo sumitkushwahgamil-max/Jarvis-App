@@ -1,4 +1,4 @@
-name: Build Jarvis APK
+name: Generate Jarvis APK
 on: [push]
 
 jobs:
@@ -14,7 +14,16 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Build Status
+      - name: Install Cloud2APK Tool
         run: |
-          echo "Building Jarvis Mobile App for Sir..."
-          echo "Success: HTML code is ready for wrapping."
+          mkdir build
+          cp index.html build/index.html
+          # Ye command files ko package karega
+          zip -r jarvis-app.zip build/
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Jarvis-Mobile-App
+          path: jarvis-app.zip
+          
